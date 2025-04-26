@@ -1,26 +1,22 @@
 pipeline {
-    agent {
-        any
-    }
-    environment {
-        CI = 'true'
-    }
+    agent any
+
     stages {
-        stage('Build') {
+        stage('Clone repository') {
             steps {
-                sh 'npm install'
+                checkout scm
             }
         }
-        stage('Test') {
+
+        stage('Build Docker image') {
             steps {
-                sh './jenkins/scripts/test.sh'
+                sh 'docker build -t myapp:latest .'
             }
         }
-        stage('Deliver') {
+
+        stage('Run Docker container') {
             steps {
-                sh './jenkins/scripts/deliver.sh'
-                input message: 'Finished using the web site? (Click "Proceed" to continue)'
-                sh './jenkins/scripts/kill.sh'
+                sh 'docker run -d -p 3000:3000 myapp:latest'
             }
         }
     }
